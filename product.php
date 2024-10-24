@@ -1,3 +1,37 @@
+<?php
+include 'config.php'; // ไฟล์สำหรับเชื่อมต่อฐานข้อมูล
+
+// รับค่า category_id จาก URL
+if (isset($_GET['category_id']) && intval($_GET['category_id']) > 0) {
+    $category_id = intval($_GET['category_id']);
+    // ดึงสินค้าตามหมวดหมู่
+    $stmt = $conn->prepare("SELECT product_id, name, description, price, image FROM products WHERE category_id = ?");
+    $stmt->bind_param("i", $category_id);
+} else {
+    // ดึงสินค้าทั้งหมด
+    $stmt = $conn->prepare("SELECT product_id, name, description, price, image FROM products");
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+
+// ดึงชื่อหมวดหมู่ (ถ้ามี)
+$category_name = '';
+if (isset($category_id) && $category_id > 0) {
+    $stmt_cat = $conn->prepare("SELECT category_name FROM categories WHERE category_id = ?");
+    $stmt_cat->bind_param("i", $category_id);
+    $stmt_cat->execute();
+    $result_cat = $stmt_cat->get_result();
+    if ($row_cat = $result_cat->fetch_assoc()) {
+        $category_name = $row_cat['category_name'];
+    }
+    $stmt_cat->close();
+}
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,19 +108,21 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav mx-auto p-4 p-lg-0">
-                <a href="index.html" class="nav-item nav-link">Home</a>
-                <a href="about.html" class="nav-item nav-link">About</a>
-                <a href="service.html" class="nav-item nav-link">Services</a>
-                <a href="product.html" class="nav-item nav-link active">Products</a>
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">ประเภทขนม</a>
-                    <div class="dropdown-menu m-0">
-                        <a href="cookie.php" class="dropdown-item">คุ้กกี้</a>
-                        <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                        <a href="404.html" class="dropdown-item">404 Page</a>
-                    </div>
+            <a href="index.php" class="nav-item nav-link">หน้าหลัก</a>
+            <a href="about.php" class="nav-item nav-link">เกี่ยวกับเรา</a>
+            <a href="service.php" class="nav-item nav-link">บริการ</a>
+            <a href="product.php" class="nav-item nav-link">สินค้าทั้งหมด</a>
+            <div class="nav-item dropdown"> 
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">ประเภทขนม</a>
+                <div class="dropdown-menu m-0">
+                    <a href="product.php?category_id=1" class="dropdown-item">คุ้กกี้</a>
+                    <a href="product.php?category_id=2" class="dropdown-item">เค้ก</a>
+                    <a href="product.php?category_id=3" class="dropdown-item">บราวนี่</a>
+                    <a href="product.php?category_id=4" class="dropdown-item">มาการอง</a>
                 </div>
-                <a href="contact.html" class="nav-item nav-link">Contact</a>
+            </div>
+            <a href="contact.php" class="nav-item nav-link">ติดต่อเรา</a>
+        </div>
                 <div class="basket-container">
                     <h3>Your Basket</h3>
                     <div id="basket-items">
@@ -129,65 +165,64 @@
 
 
     <!-- Product Start -->
-    <?php
-        include 'config.php'; // ไฟล์สำหรับเชื่อมต่อฐานข้อมูล
-
-        $sql = "SELECT product_id, name, description, price, image FROM products";
-        $result = $conn->query($sql);
-        ?>
-    <div class="container-xxl bg-light my-6 py-6 pt-0" style="margin: 12rem 0;">
+    <div class="container-xxl bg-light my-6 py-6 pt-0">
         <div class="container">
-            <div class="bg-primary text-light rounded-bottom p-5 my-6 mt-0 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="row g-4 align-items-center">
-                    <div class="col-lg-6">
-                        <h1 class="display-4 text-light mb-0">The Best Bakery In Your City</h1>
-                    </div>
-                    <div class="col-lg-6 text-lg-end">
-                        <div class="d-inline-flex align-items-center text-start">
-                            <i class="fa fa-phone-alt fa-4x flex-shrink-0"></i>
-                            <div class="ms-4">
-                                <p class="fs-5 fw-bold mb-0">Call Us</p>
-                                <p class="fs-1 fw-bold mb-0">+012 345 6789</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- ส่วนหัวของหน้าเพจ -->
+            <div class="text-center mx-auto mb-5">
+                <p class="text-primary text-uppercase mb-2">// สินค้าของเรา</p>
+                <h1 class="display-6 mb-4">
+                    <?php
+                    if (!empty($category_name)) {
+                        echo "สินค้าหมวดหมู่: " . htmlspecialchars($category_name);
+                    } else {
+                        echo "สินค้าทั้งหมด";
+                    }
+                    ?>
+                </h1>
             </div>
-            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
-                <p class="text-primary text-uppercase mb-2">// Bakery Products</p>
-                <h1 class="display-6 mb-4">Explore The Categories Of Our Bakery Products</h1>
+            <!-- เมนูหมวดหมู่ -->
+            <div class="category-menu text-center my-4">
+                <a href="product.php?category_id=1" class="btn btn-primary mx-2">Cookies</a>
+                <a href="product.php?category_id=2" class="btn btn-primary mx-2">Cakes</a>
+                <a href="product.php?category_id=3" class="btn btn-primary mx-2">Brownies</a>
+                <a href="product.php?category_id=4" class="btn btn-primary mx-2">Macarons</a>
+                <a href="product.php" class="btn btn-secondary mx-2">สินค้าทั้งหมด</a>
             </div>
+            <!-- แสดงสินค้าตามหมวดหมู่หรือทั้งหมด -->
             <div class="row g-4">
-            <?php if ($result->num_rows > 0): ?>
-                <?php while($product = $result->fetch_assoc()): ?>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">
-                            <div class="text-center p-4">
-                                <div class="d-inline-block border border-primary rounded-pill px-3 mb-3">
-                                    $<?php echo number_format($product['price'], 2); ?>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while($product = $result->fetch_assoc()): ?>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">
+                                <div class="text-center p-4">
+                                    <div class="d-inline-block border border-primary rounded-pill px-3 mb-3">
+                                        $<?php echo number_format($product['price'], 2); ?>
+                                    </div>
+                                    <h3 class="mb-3"><?php echo htmlspecialchars($product['name']); ?></h3>
+                                    <span><?php echo htmlspecialchars($product['description']); ?></span>
                                 </div>
-                                <h3 class="mb-3"><?php echo htmlspecialchars($product['name']); ?></h3>
-                                <span><?php echo htmlspecialchars($product['description']); ?></span>
-                            </div>
-                            <div class="position-relative mt-auto">
-                                <img class="img-fluid" src="uploaded_img/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                                <div class="product-overlay">
-                                    <a class="btn btn-lg-square btn-outline-light rounded-circle" href="#" onclick="addToBasket('<?php echo addslashes($product['name']); ?>', <?php echo $product['price']; ?>)">
-                                        <i class="fas fa-plus text-primary"></i>
-                                    </a>
+                                <div class="position-relative mt-auto">
+                                    <img class="img-fluid" src="uploaded_img/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                    <div class="product-overlay">
+                                        <a class="btn btn-lg-square btn-outline-light rounded-circle" href="#" onclick="addToBasket('<?php echo addslashes($product['name']); ?>', <?php echo $product['price']; ?>)">
+                                            <i class="fas fa-plus text-primary"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <p>No products found.</p>
-            <?php endif; ?>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p>ไม่พบสินค้าในหมวดหมู่นี้</p>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-    </div>
     <!-- Product End -->
-    <?php $conn->close();  ?>
+    <?php
+    $stmt->close();
+    $conn->close();
+    ?>
      
 
 
