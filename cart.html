@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <h1>Your Cart</h1>
+    <table id="cart-table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Cart items will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <div id="cart-total">
+        <h3>Total: <span id="total-amount">$0</span></h3>
+    </div>
+
+    <!-- ปุ่มชำระเงิน -->
+    <button id="checkout-button">Proceed to Checkout</button>
+
+    <!-- ปุ่มล้างตะกร้าสินค้า -->
+    <button id="clear-cart">Clear Cart</button>
+
+    <script src="js/cart.js"></script>
+</body>
+</html>
+
+
+
+
