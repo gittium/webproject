@@ -192,6 +192,7 @@ if (isset($category_id) && $category_id > 0) {
             <div class="row g-4">
                 <?php if ($result->num_rows > 0): ?>
                     <?php while($product = $result->fetch_assoc()): ?>
+                        
                         <div class="col-lg-4 col-md-6">
                             <div class="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">
                                 <div class="text-center p-4">
